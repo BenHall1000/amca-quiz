@@ -130,86 +130,22 @@ input[type=text]:focus-visible,button:focus-visible{outline:3px solid var(--lemo
    ============================================================ */
 const CONFIG = {
   title: 'AMCA End of Year Quiz',
-  hostPin: '1319',          // PIN to open the host screen. Change it before the event.
-  playerUrl: '',            // Web address players open on their phones (where you hosted this file). Used for the QR code when you run the host screen from the file on your laptop.
+  hostPin: '1234',          // PIN to open the host screen. Change it before the event.
+  playerUrl: 'https://benhall1000.github.io/amca-quiz/',            // Web address players open on their phones (where you hosted this file). Used for the QR code when you run the host screen from the file on your laptop.
   secondsPerQuestion: 15
 };
 
 const QUESTIONS = [
-  /* History */
-  { q: 'The name "Victaulic" is a blend of which two words?',
-    options: ['Victoria and aqueduct', 'Victory and hydraulic', 'Vital and tubular', 'Victor and caulk'], answer: 1,
-    fact: 'The company began as the Victory Pipe Joint Company and was renamed in 1922.' },
-
-  /* Product */
-  { q: 'Victaulic Installation-Ready\u2122 couplings are designed to be what?',
-    options: ['Delivered already installed in the wall', 'Self-grooving', 'Sold only in kits of ten', 'Ready to install straight out of the box'], answer: 3,
-    fact: 'The idea came from a customer asking for a time-saving coupling. Installation is up to ten times faster than welding or flanging.' },
-
-  /* History */
-  { q: 'In what year was the patent filed for the original Victaulic grooved coupling?',
-    options: ['1899', '1908', '1919', '1938'], answer: 2,
-    fact: 'Lieutenant Ernest Tribe filed it in April 1919. Before then, the industry relied mostly on welders to join pipe.' },
-
-  /* Product */
-  { q: 'What did the 1946 Victaulic Vic-Groover tool let crews do that they couldn\'t before?',
-    options: ['Weld pipe underwater', 'Bend pipe without heat', 'Paint pipe automatically', 'Cut and groove pipe on site'], answer: 3,
-    fact: 'Instead of grooving pipe in a big pipe shop, crews could use a lightweight tool that orbited the pipe in the field.' },
-
-  /* History */
-  { q: 'In 1952, Underwriters\' Laboratories approved Victaulic couplings and fittings for use in what, opening up a major new market?',
-    options: ['Submarine hulls', 'Fire protection systems', 'Space travel', 'Home gas lines'], answer: 1,
-    fact: 'The approval followed a demonstration in New York City. Victaulic introduced a lighter Style 75 coupling for fire protection the next year.' },
-
-  /* Product */
-  { q: 'In 1964, Victaulic made its first move into valves with the Series 700. What type of valve was it?',
-    options: ['Butterfly valve', 'Ball valve', 'Gate valve', 'Check valve'], answer: 0,
-    fact: 'It was a grooved-end valve created for mining customers who wanted something lighter and easier to install.' },
-
-  /* History */
-  { q: 'In 1976, Victaulic broke ground on a new world headquarters and foundry on 84 acres of farmland. In which US state?',
-    options: ['New Jersey', 'Ohio', 'Pennsylvania', 'Texas'], answer: 2,
-    fact: 'It was built in Easton, Pennsylvania. Earlier headquarters were in New York City and New Jersey.' },
-
-  /* Product */
-  { q: 'The Victaulic Vortex\u2122 fire suppression system uses what to create a microfine water mist?',
-    options: ['Nitrogen', 'Foam concentrate', 'Steam', 'Chlorine'], answer: 0,
-    fact: 'It launched in 2008 and puts out fires without damaging property or using toxic chemicals.' },
-
-  /* History */
-  { q: 'In 2009, Victaulic bought all rights to the Victaulic trademark under the operations of which country\'s local company?',
-    options: ['Canada', 'Australia', 'Germany', 'Japan'], answer: 1,
-    fact: 'That was Victaulic Australia Pty Ltd, part of the company\'s push to globalise the brand.' },
-
-  /* Product */
-  { q: 'What did the 1989 Victaulic Copper Connection grooved system get rid of from copper pipe joints?',
-    options: ['Lead-bearing solder', 'Asbestos gaskets', 'Mercury seals', 'Welding rods'], answer: 0,
-    fact: 'It also cut installation time and removed the fire risk of soldering.' },
-
-  /* History */
-  { q: 'In 1999, Victaulic bought the Polcast foundry, a plant that had been in bankruptcy for years. In which country?',
-    options: ['Spain', 'Belgium', 'Poland', 'Italy'], answer: 2,
-    fact: 'It was in Drezdenko, the largest employer in a town where jobs were scarce. Victaulic worked with local staff to modernise it.' },
-
-  /* Product */
-  { q: 'Victaulic\'s first UL-listed dry sprinkler, the V36 from 2003, suits spaces where water in the pipes could do what?',
-    options: ['Freeze', 'Evaporate', 'Turn rusty overnight', 'Boil'], answer: 0,
-    fact: 'Think unheated warehouses, attics, exposed loading docks and commercial freezers.' },
-
-  /* History */
-  { q: 'In 1967, Victaulic bought its largest malleable iron casting supplier, Lehigh Inc. Roughly how many employees did the company have afterwards?',
-    options: ['300', '900', '1,500', '2,000'], answer: 1,
-    fact: 'The purchase took the workforce from 125 to 900 and gave Victaulic a steady supply of castings.' },
-
-  /* Product */
-  { q: 'The patented Victaulic Advanced Groove System\u2122 (AGS) is the company\'s strongest mechanical assembly system for which pipe sizes?',
-    options: ['Tiny pipe under one inch', 'Only copper tube', 'Garden hoses', 'Large pipe, 14 to 96 inches'], answer: 3,
-    fact: 'AGS was used on a big share of the piping in the twin reflecting pools of the National September 11th Memorial.' },
-
-  /* Product */
-  { q: 'Just after WWII, Victaulic developed the Roust-A-Bout coupling. What did it let customers join?',
-    options: ['Wooden pipe', 'Plain-end steel pipe, with no grooves, threads, welding or flanging', 'Garden hoses', 'Pipe underwater'], answer: 1,
-    fact: 'It became popular for repairs and system alterations on steel pipe.' }
+  {"q":"The name \"Victaulic\" is a blend of which two words?","options":["Victoria and aqueduct","Victory and hydraulic","Vital and tubular","Victor and caulk"],"answer":1,"fact":"The company began as the Victory Pipe Joint Company and was renamed in 1922."},
+  {"q":"Which drawing revision is the right one?","options":["The one on your desk","The one in the folder","The one emailed at 4:58 pm on Friday","The one that was right yesterday"],"answer":2,"fact":"Rev Z is rarely the last Rev."},
+  {"q":"Victaulic Installation-Ready™ couplings are designed to be what?","options":["Delivered already installed in the wall","Self-grooving","Sold only in kits of ten","Ready to install straight out of the box"],"answer":3,"fact":"The idea came from a customer asking for a time-saving coupling. Installation is up to ten times faster than welding or flanging."},
+  {"q":"In what year was the patent filed for the original Victaulic grooved coupling?","options":["1899","1908","1919","1938"],"answer":2,"fact":"Lieutenant Ernest Tribe filed it in April 1919. Before then, the industry relied mostly on welders to join pipe."},
+  {"q":"What is the most common outcome of a coordination meeting?","options":["Everything is resolved","Another meeting","Free lunch","An early finish"],"answer":1,"fact":"A meeting to plan the meeting about the meeting."},
+  {"q":"What is Bert Flugelman famous for?","options":["Inventing the shoelace","Huge, shiny balls","Inventing the disposable nappy","Marrying his pet pony"],"answer":1,"fact":"He was the creator of the Mall's Balls, or the \"Spheres\", back in 1977."},
+  {"q":"In 2009, Victaulic bought all rights to the Victaulic trademark under the operations of which country's local company?","options":["Canada","Australia","Germany","Japan"],"answer":1,"fact":"That was Victaulic Australia Pty Ltd, part of the company's push to globalise the brand."},
+  {"q":"The builder says \"the riser is clear.\" What is actually in it?","options":["A cable tray, a duct and someone's lunch","Plenty of room","Nothing","A mop"],"answer":0,"fact":"And there is still no room for your pipe."},
+  {"q":"The Advanced Groove System (AGS) is Victaulic's strongest mechanical assembly system for which pipe sizes?","options":["Tiny pipe under one inch","Only copper tube","Garden hoses","Large pipe, 14 to 96 inches"],"answer":3,"fact":"AGS was used on a big share of the piping in the twin reflecting pools of the National September 11th Memorial."},
+  {"q":"How can you spot the project manager on site?","options":["Clean boots","Muddy boots","No boots","Gold boots"],"answer":0,"fact":"Also, a phone permanently attached to one ear."}
 ];
 
 /* ============================================================

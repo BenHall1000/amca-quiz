@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMCA End of Year Quiz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap');
+:root{
+  --ink:#24103A; --grape:#38205A; --grape2:#4A2D75;
+  --lemon:#FFD84A; --flamingo:#FF5C8A; --mint:#4FE3C1; --sky:#7FB8FF;
+  --cream:#FFF6EC; --mute:#C4B6DB;
+  --c0:#FF5C8A; --c1:#7FB8FF; --c2:#FFD84A; --c3:#4FE3C1;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ink);color:var(--cream);font-family:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;min-height:100vh;line-height:1.3;-webkit-font-smoothing:antialiased}
+#app{padding:20px 16px 48px}
+.narrow{max-width:560px;margin:0 auto}
+h1{font-size:clamp(38px,10vw,60px);font-weight:800;line-height:.98;letter-spacing:-.025em;margin:8px 0 14px}
+h2{font-weight:800;letter-spacing:-.01em;margin:0}
+p{margin:0 0 12px}
+.lede{font-size:18px;color:var(--mute);margin-bottom:26px}
+label{display:block;font-weight:600;margin-bottom:8px}
+input[type=text]{width:100%;font:inherit;font-size:20px;padding:16px;border-radius:14px;border:2px solid var(--grape2);background:var(--grape);color:var(--cream)}
+input[type=text]::placeholder{color:#9886B8}
+input[type=text]:focus-visible,button:focus-visible{outline:3px solid var(--lemon);outline-offset:2px}
+.btn{display:block;width:100%;font:inherit;font-weight:800;font-size:19px;padding:16px 20px;border-radius:14px;border:0;cursor:pointer;margin-top:14px}
+.btn.primary{background:var(--lemon);color:var(--ink)}
+.btn.primary:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--cream);border:2px solid var(--grape2)}
+.link{background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;cursor:pointer;padding:12px 0 0;display:block;margin:0 auto}
+.err{color:var(--flamingo);font-weight:600;min-height:24px;margin:10px 0 0}
+.warn{background:var(--flamingo);color:var(--ink);font-weight:600;padding:12px 16px;border-radius:12px;margin-bottom:16px}
+
+/* status pill (host only) */
+.status{position:fixed;top:12px;right:14px;font-size:14px;font-weight:600;padding:6px 12px;border-radius:99px;background:var(--grape);z-index:5}
+.status.on{color:var(--mint)} .status.off{color:var(--flamingo)}
+.netmsg{position:fixed;left:0;right:0;bottom:0;background:var(--flamingo);color:var(--ink);font-weight:800;text-align:center;padding:10px;z-index:6}
+
+/* phone: play */
+.topline{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;color:var(--mute);margin-bottom:10px}
+.topline .secs{font-size:26px;font-weight:800;color:var(--cream);min-width:2ch;text-align:center}
+.timer{height:12px;background:var(--grape);border-radius:99px;overflow:hidden;margin-bottom:22px}
+.timer-fill{height:100%;width:100%;background:var(--lemon);border-radius:99px}
+.timer-fill.low{background:var(--flamingo)}
+.pq{font-size:clamp(22px,5.6vw,30px);line-height:1.12;margin-bottom:18px}
+.opts{display:grid;gap:12px}
+.opt{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;font-size:19px;font-weight:600;color:var(--ink);border:0;border-radius:16px;padding:14px 16px;min-height:68px;cursor:pointer}
+.opt:disabled{cursor:default}
+.opt.k0{background:var(--c0)} .opt.k1{background:var(--c1)} .opt.k2{background:var(--c2)} .opt.k3{background:var(--c3)}
+.opt:active:not(:disabled){transform:scale(.99)}
+.opt.picked{outline:4px solid var(--cream);outline-offset:2px}
+.opt.dim{opacity:.35}
+.badge{flex:none;width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--cream);display:grid;place-items:center;font-weight:800}
+.center{text-align:center}
+.bigmsg{font-size:clamp(40px,12vw,64px);font-weight:800;line-height:1;letter-spacing:-.03em;margin:30px 0 12px}
+.bigmsg.good{color:var(--mint)} .bigmsg.bad{color:var(--flamingo)} .bigmsg.warm{color:var(--lemon)}
+.sub{color:var(--mute);font-size:18px;margin-bottom:18px}
+.fb{margin-top:20px;padding:18px;border-radius:16px;background:var(--grape);text-align:left}
+.fb p{color:var(--mute);margin:0}
+.bigscore{font-size:clamp(84px,26vw,140px);font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--lemon);margin:6px 0 4px}
+.pulse{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--mint);margin-right:8px}
+@media (prefers-reduced-motion:no-preference){
+  .timer-fill{transition:width .12s linear}
+  .pulse{animation:pl 1.6s ease-in-out infinite}
+  @keyframes pl{50%{opacity:.25}}
+}
+
+/* boards */
+.board{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.row{display:grid;grid-template-columns:2.2ch 1fr auto auto;gap:14px;align-items:baseline;padding:12px 16px;border-radius:14px;background:var(--grape)}
+.row .rk{font-weight:800;color:var(--mute);text-align:right}
+.row .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .ok{color:var(--mute);font-size:.7em}
+.row .pts{font-weight:800;font-variant-numeric:tabular-nums}
+.row.top .rk{color:var(--lemon);font-size:1.25em}
+.row.top .nm{font-weight:800}
+.empty{color:var(--mute);padding:18px 4px}
+
+/* host screen (projector) */
+.host{max-width:1400px;margin:0 auto;padding-top:20px}
+.host h1{font-size:clamp(40px,5.5vw,84px);margin:0 0 20px}
+.lobby-grid{display:grid;gap:40px;grid-template-columns:1fr}
+@media (min-width:900px){.lobby-grid{grid-template-columns:minmax(340px,430px) 1fr;align-items:start}}
+.qr{background:var(--cream);border-radius:22px;padding:22px;display:grid;place-items:center;width:fit-content;min-width:220px;min-height:220px}
+.qr img,.qr canvas{display:block;max-width:100%;height:auto}
+.qr-hint{color:var(--ink);font-weight:600;text-align:center;max-width:260px}
+.joinurl{font-size:20px;color:var(--mute);margin:16px 0 4px;word-break:break-all}
+.code{font-size:clamp(46px,6vw,84px);font-weight:800;letter-spacing:.08em;color:var(--lemon);line-height:1}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:var(--grape);border-radius:99px;padding:8px 18px;font-size:clamp(18px,2vw,28px);font-weight:600}
+.hostbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:34px;flex-wrap:wrap}
+.hostbar .hint{color:var(--mute);font-size:18px}
+.hostbar .btn{width:auto;margin:0;padding:16px 34px;font-size:22px}
+.htop{display:flex;align-items:baseline;justify-content:space-between;gap:16px;color:var(--mute);font-weight:600;font-size:clamp(18px,2vw,26px);margin-bottom:12px}
+.htop .secs{font-size:clamp(40px,5vw,72px);font-weight:800;color:var(--cream)}
+.htop .ans{color:var(--lemon);font-weight:800}
+.host .timer{height:16px;margin-bottom:30px}
+.hq{font-size:clamp(30px,4.6vw,68px);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:0 0 30px}
+.hopts{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:800px){.hopts{grid-template-columns:1fr 1fr}}
+.hopt{display:flex;align-items:center;gap:18px;border-radius:20px;padding:20px 24px;font-size:clamp(20px,2.6vw,40px);font-weight:700;color:var(--ink);position:relative;overflow:hidden;min-height:96px}
+.hopt.k0{background:var(--c0)} .hopt.k1{background:var(--c1)} .hopt.k2{background:var(--c2)} .hopt.k3{background:var(--c3)}
+.hopt .badge{width:clamp(40px,4vw,60px);height:clamp(40px,4vw,60px);font-size:clamp(20px,2.4vw,32px)}
+.hopt .cnt{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums}
+.hopt.dim{opacity:.3}
+.hopt.right{outline:6px solid var(--cream);outline-offset:3px}
+.reveal-grid{display:grid;gap:36px;grid-template-columns:1fr}
+@media (min-width:1000px){.reveal-grid{grid-template-columns:1.25fr 1fr;align-items:start}}
+.hfact{margin-top:24px;padding:20px 24px;border-radius:18px;background:var(--grape);font-size:clamp(18px,2vw,30px);color:var(--mute)}
+.hfact b{color:var(--mint)}
+.host .board .row{padding:14px 20px;font-size:clamp(20px,2.4vw,36px)}
+.host h2.sec{font-size:clamp(26px,3vw,44px);margin-bottom:14px}
+.final-grid{display:grid;gap:36px;grid-template-columns:1fr}
+.host-actions{display:flex;gap:12px;flex-wrap:wrap}
+.host-actions .btn{width:auto;margin:0;padding:12px 20px;font-size:16px}
+.pin{display:flex;gap:10px;margin-top:14px}
+.pin input{flex:1}
+.pin .btn{width:auto;margin-top:0}
+</style>
+</head>
+<body>
+<div id="status" class="status" hidden></div>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ============================================================
+   EDIT ME
+   ============================================================ */
+const CONFIG = {
+  title: 'AMCA End of Year Quiz',
+  hostPin: '1319',          // PIN to open the host screen. Change it before the event.
+  playerUrl: '',            // Web address players open on their phones (where you hosted this file). Used for the QR code when you run the host screen from the file on your laptop.
+  secondsPerQuestion: 15
+};
+
+const QUESTIONS = [
+  /* History */
+  { q: 'The name "Victaulic" is a blend of which two words?',
+    options: ['Victoria and aqueduct', 'Victory and hydraulic', 'Vital and tubular', 'Victor and caulk'], answer: 1,
+    fact: 'The company began as the Victory Pipe Joint Company and was renamed in 1922.' },
+
+  /* Product */
+  { q: 'Victaulic Installation-Ready\u2122 couplings are designed to be what?',
+    options: ['Delivered already installed in the wall', 'Self-grooving', 'Sold only in kits of ten', 'Ready to install straight out of the box'], answer: 3,
+    fact: 'The idea came from a customer asking for a time-saving coupling. Installation is up to ten times faster than welding or flanging.' },
+
+  /* History */
+  { q: 'In what year was the patent filed for the original Victaulic grooved coupling?',
+    options: ['1899', '1908', '1919', '1938'], answer: 2,
+    fact: 'Lieutenant Ernest Tribe filed it in April 1919. Before then, the industry relied mostly on welders to join pipe.' },
+
+  /* Product */
+  { q: 'What did the 1946 Victaulic Vic-Groover tool let crews do that they couldn\'t before?',
+    options: ['Weld pipe underwater', 'Bend pipe without heat', 'Paint pipe automatically', 'Cut and groove pipe on site'], answer: 3,
+    fact: 'Instead of grooving pipe in a big pipe shop, crews could use a lightweight tool that orbited the pipe in the field.' },
+
+  /* History */
+  { q: 'In 1952, Underwriters\' Laboratories approved Victaulic couplings and fittings for use in what, opening up a major new market?',
+    options: ['Submarine hulls', 'Fire protection systems', 'Space travel', 'Home gas lines'], answer: 1,
+    fact: 'The approval followed a demonstration in New York City. Victaulic introduced a lighter Style 75 coupling for fire protection the next year.' },
+
+  /* Product */
+  { q: 'In 1964, Victaulic made its first move into valves with the Series 700. What type of valve was it?',
+    options: ['Butterfly valve', 'Ball valve', 'Gate valve', 'Check valve'], answer: 0,
+    fact: 'It was a grooved-end valve created for mining customers who wanted something lighter and easier to install.' },
+
+  /* History */
+  { q: 'In 1976, Victaulic broke ground on a new world headquarters and foundry on 84 acres of farmland. In which US state?',
+    options: ['New Jersey', 'Ohio', 'Pennsylvania', 'Texas'], answer: 2,
+    fact: 'It was built in Easton, Pennsylvania. Earlier headquarters were in New York City and New Jersey.' },
+
+  /* Product */
+  { q: 'The Victaulic Vortex\u2122 fire suppression system uses what to create a microfine water mist?',
+    options: ['Nitrogen', 'Foam concentrate', 'Steam', 'Chlorine'], answer: 0,
+    fact: 'It launched in 2008 and puts out fires without damaging property or using toxic chemicals.' },
+
+  /* History */
+  { q: 'In 2009, Victaulic bought all rights to the Victaulic trademark under the operations of which country\'s local company?',
+    options: ['Canada', 'Australia', 'Germany', 'Japan'], answer: 1,
+    fact: 'That was Victaulic Australia Pty Ltd, part of the company\'s push to globalise the brand.' },
+
+  /* Product */
+  { q: 'What did the 1989 Victaulic Copper Connection grooved system get rid of from copper pipe joints?',
+    options: ['Lead-bearing solder', 'Asbestos gaskets', 'Mercury seals', 'Welding rods'], answer: 0,
+    fact: 'It also cut installation time and removed the fire risk of soldering.' },
+
+  /* History */
+  { q: 'In 1999, Victaulic bought the Polcast foundry, a plant that had been in bankruptcy for years. In which country?',
+    options: ['Spain', 'Belgium', 'Poland', 'Italy'], answer: 2,
+    fact: 'It was in Drezdenko, the largest employer in a town where jobs were scarce. Victaulic worked with local staff to modernise it.' },
+
+  /* Product */
+  { q: 'Victaulic\'s first UL-listed dry sprinkler, the V36 from 2003, suits spaces where water in the pipes could do what?',
+    options: ['Freeze', 'Evaporate', 'Turn rusty overnight', 'Boil'], answer: 0,
+    fact: 'Think unheated warehouses, attics, exposed loading docks and commercial freezers.' },
+
+  /* History */
+  { q: 'In 1967, Victaulic bought its largest malleable iron casting supplier, Lehigh Inc. Roughly how many employees did the company have afterwards?',
+    options: ['300', '900', '1,500', '2,000'], answer: 1,
+    fact: 'The purchase took the workforce from 125 to 900 and gave Victaulic a steady supply of castings.' },
+
+  /* Product */
+  { q: 'The patented Victaulic Advanced Groove System\u2122 (AGS) is the company\'s strongest mechanical assembly system for which pipe sizes?',
+    options: ['Tiny pipe under one inch', 'Only copper tube', 'Garden hoses', 'Large pipe, 14 to 96 inches'], answer: 3,
+    fact: 'AGS was used on a big share of the piping in the twin reflecting pools of the National September 11th Memorial.' },
+
+  /* Product */
+  { q: 'Just after WWII, Victaulic developed the Roust-A-Bout coupling. What did it let customers join?',
+    options: ['Wooden pipe', 'Plain-end steel pipe, with no grooves, threads, welding or flanging', 'Garden hoses', 'Pipe underwater'], answer: 1,
+    fact: 'It became popular for repairs and system alterations on steel pipe.' }
+];
+
+/* ============================================================
+   Shared helpers
+   ============================================================ */
+const N = QUESTIONS.length;
+const LIMIT = CONFIG.secondsPerQuestion;
+const PREFIX = 'amcaquiz-';
+const app = document.getElementById('app');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const slugify = n => n.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const params = new URLSearchParams(location.search);
+const PEER_SRCS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js',
+  'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+  'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'
+];
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
+
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+async function ensurePeer() {
+  if (typeof Peer !== 'undefined') return true;
+  for (const u of PEER_SRCS) {
+    try { await loadScript(u); if (typeof Peer !== 'undefined') return true; } catch (e) {}
+  }
+  return false;
+}
+function baseUrl() { return location.href.split('?')[0].split('#')[0]; }
+function boardHTML(rows, limit, meSlug) {
+  if (!rows.length) return '<p class="empty">No players yet.</p>';
+  return '<ol class="board">' + rows.slice(0, limit).map((r, i) =>
+    `<li class="row ${i < 3 ? 'top' : ''}"><span class="rk">${i + 1}</span><span class="nm">${esc(r.name)}</span><span class="ok">${r.correct}/${N}</span><span class="pts">${r.score}</span></li>`
+  ).join('') + '</ol>';
+}
+
+/* ============================================================
+   Landing page (no parameters)
+   ============================================================ */
+function showLanding(msg = '') {
+  app.innerHTML = `
+  <main class="narrow">
+    <h1>${esc(CONFIG.title)}</h1>
+    <p class="lede">Scan the QR code on the big screen to join, or type the 4-letter code shown there.</p>
+    <label for="code">Game code</label>
+    <input type="text" id="code" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="ABCD">
+    <p class="err" id="err">${esc(msg)}</p>
+    <button class="btn primary" id="go">Join</button>
+    <button class="link" id="host">Host a game</button>
+  </main>`;
+  const go = () => {
+    const c = $('code').value.trim().toUpperCase();
+    if (c.length !== 4) { $('err').textContent = 'The code has 4 letters.'; return; }
+    location.search = '?join=' + c;
+  };
+  $('go').onclick = go;
+  $('code').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  $('host').onclick = () => { location.search = '?host'; };
+}
+
+/* ============================================================
+   PLAYER (phone)
+   ============================================================ */
+const P = { pid: '', name: '', code: '', peer: null, conn: null, view: null, tick: null, retry: null, shownAt: 0, joined: false };
+
+function playerBoot() {
+  P.code = (params.get('join') || '').toUpperCase().slice(0, 4);
+  if (P.code.length !== 4) return showLanding('That game code is not valid.');
+  P.pid = lsGet('amcaquiz-pid');
+  if (!P.pid) { P.pid = 'p' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); lsSet('amcaquiz-pid', P.pid); }
+  const last = lsGet('amcaquiz-last');                // "CODE|name" so a refresh drops you straight back in
+  if (last && last.split('|')[0] === P.code) { P.name = last.split('|').slice(1).join('|'); return playerConnect(); }
+  playerNameForm();
+}
+
+function playerNameForm(msg = '') {
+  clearInterval(P.tick);
+  app.innerHTML = `
+  <main class="narrow">
+    <h1>${esc(CONFIG.title)}</h1>
+    <p class="lede">${N} questions, ${LIMIT} seconds each. Correct answers score points, and faster answers score more.</p>
+    <label for="name">Your name</label>
+    <input type="text" id="name" maxlength="20" autocomplete="off" placeholder="First name and initial" value="${esc(P.name)}">
+    <p class="err" id="err">${esc(msg)}</p>
+    <button class="btn primary" id="join">Join game ${esc(P.code)}</button>
+  </main>`;
+  const go = () => {
+    const name = $('name').value.trim();
+    if (name.length < 2) { $('err').textContent = 'Enter your name so we can put you on the board.'; return; }
+    if (!slugify(name)) { $('err').textContent = 'Use letters or numbers in your name.'; return; }
+    P.name = name; lsSet('amcaquiz-last', P.code + '|' + name); playerConnect();
+  };
+  $('join').onclick = go;
+  $('name').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+}
+
+function netMsg(text) {
+  let el = $('netmsg');
+  if (!text) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'netmsg'; el.className = 'netmsg'; document.body.appendChild(el); }
+  el.textContent = text;
+}
+
+async function playerConnect() {
+  app.innerHTML = '<main class="narrow center"><h1>Joining</h1><p class="sub"><span class="pulse"></span>Connecting to the game</p></main>';
+  const ok = await ensurePeer();
+  if (!ok) { app.innerHTML = '<main class="narrow"><h1>Cannot load</h1><p class="lede">This page needs an internet connection. Check your signal and reload.</p></main>'; return; }
+  openPlayerPeer();
+}
+
+function openPlayerPeer() {
+  clearTimeout(P.retry);
+  try { if (P.peer) P.peer.destroy(); } catch (e) {}
+  P.conn = null;
+  const retry = () => { clearTimeout(P.retry); netMsg('Reconnecting…'); P.retry = setTimeout(openPlayerPeer, 2500); };
+  const peer = new Peer();
+  P.peer = peer;
+  peer.on('open', () => {
+    const conn = peer.connect(PREFIX + P.code, { reliable: true });
+    P.conn = conn;
+    conn.on('open', () => { netMsg(''); conn.send({ t: 'join', pid: P.pid, name: P.name }); });
+    conn.on('data', onHostMsg);
+    conn.on('close', retry);
+    conn.on('error', retry);
+  });
+  peer.on('error', e => {
+    if (e.type === 'peer-unavailable') { if (!P.joined) { netMsg('Cannot find game ' + P.code + '. Retrying…'); } else netMsg('Reconnecting…'); }
+    retry();
+  });
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+}
+
+function onHostMsg(d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'error') {
+    P.joined = false; lsDel('amcaquiz-last'); clearTimeout(P.retry);
+    try { P.peer.destroy(); } catch (e) {}
+    netMsg(''); return playerNameForm(d.msg || 'Could not join.');
+  }
+  if (d.t === 'state') { P.joined = true; netMsg(''); P.view = d; P.shownAt = performance.now(); renderPlayer(); }
+}
+
+function renderPlayer() {
+  clearInterval(P.tick);
+  const v = P.view;
+  if (!v) return;
+  if (v.phase === 'lobby') {
+    app.innerHTML = `<main class="narrow center"><h1>You're in, ${esc(v.name)}</h1><p class="sub"><span class="pulse"></span>Watch the big screen. The quiz starts soon.</p></main>`;
+  } else if (v.phase === 'question') {
+    renderQuestion(v);
+  } else if (v.phase === 'reveal') {
+    const head = v.answered ? (v.ok ? `Correct. +${v.pts}` : 'Not quite') : 'Time is up';
+    const cls = v.ok ? 'good' : v.answered ? 'bad' : 'warm';
+    app.innerHTML = `<main class="narrow center">
+      <p class="sub" style="margin:0">Question ${v.idx + 1} of ${v.total}</p>
+      <div class="bigmsg ${cls}">${esc(head)}</div>
+      ${v.ok ? '' : `<p class="sub">The answer was ${esc(v.correctText)}.</p>`}
+      <p class="sub">You are #${v.rank} of ${v.of} with ${v.score} points.</p>
+      <div class="fb"><p>${esc(v.fact)}</p></div>
+      <p class="sub" style="margin-top:20px"><span class="pulse"></span>Next question coming up</p>
+    </main>`;
+  } else if (v.phase === 'final') {
+    app.innerHTML = `<main class="narrow center">
+      <p class="sub" style="margin:0">${esc(v.name)}, you finished</p>
+      <div class="bigscore">#${v.rank}</div>
+      <p class="sub">of ${v.of} players, with ${v.score} points and ${v.correct} of ${v.total} correct.</p>
+      <p class="sub">Thanks for playing.</p>
+    </main>`;
+  }
+}
+
+function renderQuestion(v) {
+  const remainingAtShow = v.remaining;
+  app.innerHTML = `
+  <main class="narrow">
+    <div class="topline"><span>Question ${v.idx + 1} of ${v.total}</span><span class="secs" id="secs">${Math.ceil(remainingAtShow / 1000)}</span><span></span></div>
+    <div class="timer"><div class="timer-fill" id="fill"></div></div>
+    <h2 class="pq">${esc(v.q)}</h2>
+    <div class="opts">
+      ${v.options.map((o, i) => `<button class="opt k${i} ${v.answered ? (i === v.choice ? 'picked' : 'dim') : ''}" data-i="${i}" ${v.answered ? 'disabled' : ''}><span class="badge">${'ABCD'[i]}</span><span>${esc(o)}</span></button>`).join('')}
+    </div>
+    <p class="sub center" id="locked" style="margin-top:18px">${v.answered ? 'Locked in. Waiting for the others.' : ''}</p>
+  </main>`;
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    if (P.view.answered || !P.conn || !P.conn.open) return;
+    const choice = +b.dataset.i;
+    P.view.answered = true; P.view.choice = choice;
+    P.conn.send({ t: 'answer', pid: P.pid, q: v.idx, choice });
+    document.querySelectorAll('.opt').forEach((x, i) => { x.disabled = true; x.classList.add(i === choice ? 'picked' : 'dim'); });
+    $('locked').textContent = 'Locked in. Waiting for the others.';
+  });
+  const fill = $('fill'), secs = $('secs');
+  P.tick = setInterval(() => {
+    const left = Math.max(0, remainingAtShow - (performance.now() - P.shownAt));
+    fill.style.width = (left / (LIMIT * 1000) * 100) + '%';
+    fill.classList.toggle('low', left <= 5000);
+    secs.textContent = Math.ceil(left / 1000);
+    if (left <= 0) { clearInterval(P.tick); document.querySelectorAll('.opt').forEach(x => x.disabled = true); if (!P.view.answered) $('locked').textContent = 'Time is up.'; }
+  }, 100);
+}
+
+/* ============================================================
+   HOST (laptop on the big screen)
+   ============================================================ */
+const LS_KEY = 'amcaquiz-host-game';
+let H = null, hpeer = null, conns = {}, hostTick = null, hostOnline = false, hostMsg = 'Connecting…';
+
+function newGame() {
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; let c = '';
+  for (let i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)];
+  return { code: c, phase: 'lobby', idx: -1, qStart: 0, scoredIdx: -1, players: {} };
+}
+function saveH() { lsSet(LS_KEY, JSON.stringify(H)); }
+function loadH() { try { const v = JSON.parse(lsGet(LS_KEY)); return v && v.code && v.players ? v : null; } catch (e) { return null; } }
+
+function setStatus(ok, msg) {
+  hostOnline = ok; hostMsg = msg || (ok ? 'Live. Players can join.' : 'Connecting…');
+  const el = $('status'); if (!el) return;
+  el.hidden = false; el.className = 'status ' + (ok ? 'on' : 'off'); el.textContent = '● ' + hostMsg;
+}
+
+function hostBoot() {
+  app.innerHTML = `
+  <main class="narrow">
+    <h1>Host screen</h1>
+    <p class="lede">Enter the host PIN to run the quiz from this laptop.</p>
+    <div class="pin"><input type="text" id="pin" placeholder="Host PIN" inputmode="numeric" autocomplete="off"><button class="btn primary" id="pinok">Open</button></div>
+    <p class="err" id="err"></p>
+  </main>`;
+  const go = () => { if ($('pin').value === CONFIG.hostPin) hostChoose(); else $('err').textContent = 'Wrong PIN.'; };
+  $('pinok').onclick = go;
+  $('pin').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  $('pin').focus();
+}
+
+function hostChoose() {
+  const saved = loadH();
+  if (saved && saved.phase !== 'final') {
+    const n = Object.keys(saved.players).length;
+    app.innerHTML = `
+    <main class="narrow">
+      <h1>Game in progress</h1>
+      <p class="lede">Code ${esc(saved.code)} with ${n} player${n === 1 ? '' : 's'}. Pick up where you left off, or start fresh.</p>
+      <button class="btn primary" id="resume">Resume game ${esc(saved.code)}</button>
+      <button class="btn ghost" id="fresh">Start a new game</button>
+    </main>`;
+    $('resume').onclick = () => hostStart(saved);
+    $('fresh').onclick = () => hostStart(newGame());
+  } else hostStart(newGame());
+}
+
+async function hostStart(game) {
+  H = game; saveH();
+  app.innerHTML = '<main class="narrow"><h1>Starting</h1><p class="lede">Connecting to the relay service…</p></main>';
+  $('status').hidden = false; setStatus(false, 'Connecting…');
+  const ok = await ensurePeer();
+  if (!ok) { setStatus(false, 'Cannot load the connection library. Check the laptop internet.'); app.innerHTML = '<main class="narrow"><h1>No connection</h1><p class="lede">The laptop needs internet to set up the game. Check it and reload.</p></main>'; return; }
+  openHostPeer(0);
+  renderHost();
+  if (H.phase === 'question') startTick();
+}
+
+function openHostPeer(attempt) {
+  try { if (hpeer) hpeer.destroy(); } catch (e) {}
+  conns = {};
+  const peer = new Peer(PREFIX + H.code);
+  hpeer = peer;
+  peer.on('open', () => { setStatus(true); });
+  peer.on('connection', c => {
+    c.on('data', d => onPlayerMsg(c, d));
+    c.on('close', () => onConnClose(c));
+    c.on('error', () => {});
+  });
+  peer.on('disconnected', () => { setStatus(false, 'Reconnecting…'); try { peer.reconnect(); } catch (e) {} });
+  peer.on('error', e => {
+    if (e.type === 'unavailable-id' && attempt < 10) { setStatus(false, 'Reclaiming game code…'); setTimeout(() => openHostPeer(attempt + 1), 3000); }
+    else setStatus(false, 'Connection problem (' + (e.type || 'unknown') + ')');
+  });
+}
+
+function rankedList() {
+  return Object.entries(H.players).map(([pid, p]) => ({ pid, name: p.name, score: p.score, correct: p.correct, joined: p.joined }))
+    .sort((a, b) => b.score - a.score || a.joined - b.joined);
+}
+function isOpen(pid) { return conns[pid] && conns[pid].open; }
+function connectedPids() { return Object.keys(H.players).filter(isOpen); }
+
+function onPlayerMsg(c, d) {
+  if (!d || typeof d !== 'object' || typeof d.pid !== 'string') return;
+  if (d.t === 'join') {
+    const name = String(d.name || '').trim().slice(0, 20);
+    const slug = slugify(name);
+    if (name.length < 2 || !slug) { c.send({ t: 'error', msg: 'Use at least 2 letters or numbers in your name.' }); return; }
+    const clash = Object.entries(H.players).some(([pid, p]) => pid !== d.pid && slugify(p.name) === slug);
+    if (clash) { c.send({ t: 'error', msg: 'That name is already taken. Add an initial and try again.' }); return; }
+    const existing = H.players[d.pid];
+    H.players[d.pid] = existing ? Object.assign(existing, { name }) : { name, score: 0, correct: 0, joined: Date.now(), answers: {} };
+    conns[d.pid] = c; c._pid = d.pid;
+    saveH(); sendState(d.pid); updateLobby(); updateAnswered();
+  } else if (d.t === 'answer') {
+    const p = H.players[d.pid];
+    if (!p || H.phase !== 'question' || d.q !== H.idx || p.answers[H.idx]) return;
+    const choice = +d.choice;
+    if (!(choice >= 0 && choice < QUESTIONS[H.idx].options.length)) return;
+    const elapsed = (Date.now() - H.qStart) / 1000;
+    if (elapsed > LIMIT + 2) return;
+    const ok = choice === QUESTIONS[H.idx].answer;
+    const pts = ok ? 100 + Math.round(100 * Math.max(0, 1 - elapsed / LIMIT)) : 0;
+    p.answers[H.idx] = { choice, pts, ok };
+    conns[d.pid] = c; c._pid = d.pid;
+    saveH(); updateAnswered();
+    if (allAnswered()) doReveal();
+  }
+}
+
+function onConnClose(c) {
+  const pid = c._pid;
+  if (pid && conns[pid] === c) delete conns[pid];
+  updateLobby(); updateAnswered();
+  if (H && H.phase === 'question' && allAnswered()) doReveal();
+}
+
+function allAnswered() {
+  const pids = connectedPids();
+  return pids.length > 0 && pids.every(pid => H.players[pid].answers[H.idx]);
+}
+
+function sendState(pid) {
+  const c = conns[pid]; if (!c || !c.open) return;
+  const p = H.players[pid];
+  const base = { t: 'state', phase: H.phase, total: N, name: p.name };
+  let v = base;
+  if (H.phase === 'question') {
+    const q = QUESTIONS[H.idx], a = p.answers[H.idx];
+    v = Object.assign(base, { idx: H.idx, q: q.q, options: q.options, remaining: Math.max(0, LIMIT * 1000 - (Date.now() - H.qStart)), answered: !!a, choice: a ? a.choice : -1 });
+  } else if (H.phase === 'reveal') {
+    const q = QUESTIONS[H.idx], a = p.answers[H.idx], list = rankedList();
+    v = Object.assign(base, { idx: H.idx, answered: !!a, ok: !!(a && a.ok), pts: a && a.ok ? a.pts : 0, score: p.score, rank: list.findIndex(r => r.pid === pid) + 1, of: list.length, correctText: q.options[q.answer], fact: q.fact });
+  } else if (H.phase === 'final') {
+    const list = rankedList();
+    v = Object.assign(base, { score: p.score, correct: p.correct, rank: list.findIndex(r => r.pid === pid) + 1, of: list.length });
+  }
+  try { c.send(v); } catch (e) {}
+}
+function broadcast() { Object.keys(H.players).forEach(sendState); }
+
+function startQuestion(i) {
+  H.idx = i; H.phase = 'question'; H.qStart = Date.now(); saveH();
+  broadcast(); renderHost(); startTick();
+}
+function startTick() {
+  clearInterval(hostTick);
+  hostTick = setInterval(() => {
+    const el = (Date.now() - H.qStart) / 1000, left = Math.max(0, LIMIT - el);
+    const fill = $('fill'), secs = $('hsecs');
+    if (fill) { fill.style.width = (left / LIMIT * 100) + '%'; fill.classList.toggle('low', left <= 5); }
+    if (secs) secs.textContent = Math.ceil(left);
+    if (left <= 0) doReveal();
+  }, 100);
+}
+function doReveal() {
+  if (H.phase !== 'question') return;
+  clearInterval(hostTick);
+  if (H.scoredIdx !== H.idx) {
+    Object.values(H.players).forEach(p => { const a = p.answers[H.idx]; if (a && a.ok) { p.score += a.pts; p.correct++; } });
+    H.scoredIdx = H.idx;
+  }
+  H.phase = 'reveal'; saveH(); broadcast(); renderHost();
+}
+function finishGame() { H.phase = 'final'; saveH(); broadcast(); renderHost(); }
+
+function primary() {
+  if (!H) return;
+  if (H.phase === 'lobby') {
+    if (!Object.keys(H.players).length && !confirm('Nobody has joined yet. Start anyway?')) return;
+    startQuestion(0);
+  } else if (H.phase === 'question') doReveal();
+  else if (H.phase === 'reveal') { if (H.idx + 1 < N) startQuestion(H.idx + 1); else finishGame(); }
+}
+document.addEventListener('keydown', e => {
+  if (!H || (e.key !== 'Enter' && e.key !== ' ')) return;
+  if (/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+  if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+  e.preventDefault(); primary();
+});
+
+/* ---------- host rendering ---------- */
+function renderHost() {
+  if (H.phase === 'lobby') return hostLobby();
+  if (H.phase === 'question') return hostQuestion();
+  if (H.phase === 'reveal') return hostReveal();
+  return hostFinal();
+}
+
+function hostLobby() {
+  const url = (CONFIG.playerUrl || baseUrl()).split('?')[0] + '?join=' + H.code;
+  const isFile = location.protocol === 'file:' && !CONFIG.playerUrl;
+  app.innerHTML = `
+  <main class="host">
+    ${isFile ? '<p class="warn">This is running from a file, so phones have no address to scan. Set playerUrl at the top of the file to your hosted link.</p>' : ''}
+    <div class="lobby-grid">
+      <section>
+        <h1>Scan to play</h1>
+        <div class="qr" id="qr"></div>
+        <p class="joinurl">${esc(url)}</p>
+        <p style="color:var(--mute);margin:14px 0 4px">or enter the code</p>
+        <div class="code">${esc(H.code)}</div>
+      </section>
+      <section>
+        <h1 style="font-size:clamp(32px,4vw,60px)">Players <span id="pc" style="color:var(--lemon)">0</span></h1>
+        <div class="chips" id="plist"></div>
+      </section>
+    </div>
+    <div class="hostbar"><span class="hint">Press Start when the room is ready. Space or Enter also works.</span><button class="btn primary" id="go">Start quiz</button></div>
+  </main>`;
+  $('go').onclick = primary;
+  const qr = $('qr');
+  if (typeof QRCode === 'undefined') qr.innerHTML = '<p class="qr-hint">QR code could not load. Use the code below instead.</p>';
+  else new QRCode(qr, { text: url, width: 340, height: 340, colorDark: '#24103A', colorLight: '#FFF6EC', correctLevel: QRCode.CorrectLevel.M });
+  updateLobby();
+}
+function updateLobby() {
+  if (!H || H.phase !== 'lobby') return;
+  const list = Object.values(H.players).sort((a, b) => a.joined - b.joined);
+  const pl = $('plist'), pc = $('pc');
+  if (pc) pc.textContent = list.length;
+  if (pl) pl.innerHTML = list.length ? list.map(p => `<span class="chip">${esc(p.name)}</span>`).join('') : '<p class="empty" style="font-size:22px">Waiting for the first player…</p>';
+}
+
+function answeredCounts() {
+  const pids = Object.keys(H.players);
+  const answered = pids.filter(pid => H.players[pid].answers[H.idx]).length;
+  const total = Math.max(connectedPids().length, answered);
+  return { answered, total };
+}
+function updateAnswered() {
+  if (!H || H.phase !== 'question') return;
+  const el = $('hans'); if (!el) return;
+  const { answered, total } = answeredCounts();
+  el.textContent = answered + ' of ' + total + ' answered';
+}
+
+function hostQuestion() {
+  const q = QUESTIONS[H.idx];
+  app.innerHTML = `
+  <main class="host">
+    <div class="htop"><span>Question ${H.idx + 1} of ${N}</span><span class="ans" id="hans"></span><span class="secs" id="hsecs">${LIMIT}</span></div>
+    <div class="timer"><div class="timer-fill" id="fill"></div></div>
+    <h2 class="hq">${esc(q.q)}</h2>
+    <div class="hopts">${q.options.map((o, i) => `<div class="hopt k${i}"><span class="badge">${'ABCD'[i]}</span><span>${esc(o)}</span></div>`).join('')}</div>
+    <div class="hostbar"><span class="hint">Moves on when everyone has answered or time runs out.</span><button class="btn ghost" id="go">Show answer now</button></div>
+  </main>`;
+  $('go').onclick = primary;
+  updateAnswered();
+}
+
+function hostReveal() {
+  const q = QUESTIONS[H.idx];
+  const counts = q.options.map((_, i) => Object.values(H.players).filter(p => p.answers[H.idx] && p.answers[H.idx].choice === i).length);
+  const last = H.idx === N - 1;
+  app.innerHTML = `
+  <main class="host">
+    <div class="htop"><span>Question ${H.idx + 1} of ${N}</span></div>
+    <div class="reveal-grid">
+      <section>
+        <h2 class="hq" style="font-size:clamp(26px,3.4vw,52px)">${esc(q.q)}</h2>
+        <div class="hopts" style="grid-template-columns:1fr">${q.options.map((o, i) => `<div class="hopt k${i} ${i === q.answer ? 'right' : 'dim'}"><span class="badge">${'ABCD'[i]}</span><span>${esc(o)}</span><span class="cnt">${counts[i]}</span></div>`).join('')}</div>
+        <div class="hfact"><b>Did you know?</b> ${esc(q.fact)}</div>
+      </section>
+      <section>
+        <h2 class="sec">Leaderboard</h2>
+        ${boardHTML(rankedList(), 5)}
+      </section>
+    </div>
+    <div class="hostbar"><span class="hint">Space or Enter for the next screen.</span><button class="btn primary" id="go">${last ? 'Final results' : 'Next question'}</button></div>
+  </main>`;
+  $('go').onclick = primary;
+}
+
+function hostFinal() {
+  app.innerHTML = `
+  <main class="host">
+    <h1>Final results</h1>
+    <div class="final-grid">${boardHTML(rankedList(), 10)}</div>
+    <div class="hostbar"><div class="host-actions"><button class="btn ghost" id="again">Start a new game</button></div></div>
+  </main>`;
+  $('again').onclick = () => { if (confirm('Start a new game? This clears the current results.')) { lsDel(LS_KEY); hostStart(newGame()); } };
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+window.addEventListener('beforeunload', () => { try { if (hpeer) hpeer.destroy(); } catch (e) {} });
+if (params.has('host')) hostBoot();
+else if (params.has('join')) playerBoot();
+else showLanding();
+</script>
+</body>
+</html>
